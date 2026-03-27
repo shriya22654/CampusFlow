@@ -30,29 +30,31 @@ export default function Login({
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const[error, setError]=useState("");
 
- const handleSubmit = async () => {
-  if (!form.email || !form.password) return alert("Email aur Password toh daalo!");
+  const handleSubmit = async () => {
+    setError("");
+    if (!form.email || !form.password) return setError("Enter correct email and password!");
 
-  setLoading(true);
-  try {
-    // 1. Backend ko request bhejo (Apna port check kar lena, maine 1485 mana hai)
-    const res = await axios.post("http://localhost:1485/api/auth/login", form);
+    setLoading(true);
+    try {
+      // 1. Backend request
+      const res = await axios.post("http://localhost:1485/api/auth/login", form);
 
-    // 2. Agar login sahi raha, toh Token save karo
-    localStorage.setItem("token", res.data.token);
-    
-    alert("Login Successful! 🎉");
-    
-    // 3. User ko Home/Dashboard par le jao
-    onGoHome(); 
-  } catch (err) {
-    // Agar galat password ya email hua toh error dikhao
-    alert(err.response?.data?.message || "Login fail ho gaya!");
-  } finally {
-    setLoading(false);
-  }
-};
+      // 2. Data save logic
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      
+      // --- YAHAN CHANGE KIYA HAI: ALERT HATAKAR REFRESH + REDIRECT ---
+      window.location.href = "/dashboard"; 
+      // -------------------------------------------------------------
+
+    } catch (err) {
+      setError(err.response?.data?.message || "Enter correct email or password!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative z-10 min-h-screen flex flex-col">
@@ -99,7 +101,6 @@ export default function Login({
             backdropFilter: "blur(20px)",
           }}
         >
-          {/* Card inner glow */}
           <div
             className="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none"
             style={{
@@ -163,7 +164,7 @@ export default function Login({
                 Email
               </label>
               <input
-                className="auth-input"
+                className={`auth-input ${error && !form.email ? 'border-red-500/50' : ''}`}
                 type="email"
                 placeholder="you@college.edu"
                 value={form.email}
@@ -181,7 +182,7 @@ export default function Login({
               </div>
               <div className="relative">
                 <input
-                  className="auth-input"
+                  className={`auth-input ${error && !form.password ? 'border-red-500/50' : ''}`}
                   type={showPass ? "text" : "password"}
                   placeholder="••••••••"
                   value={form.password}
@@ -207,7 +208,11 @@ export default function Login({
               </div>
             </div>
           </div>
-
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium flex items-center gap-2 animate-pulse">
+              <span>⚠️</span> {error}
+            </div>
+          )}
           {/* Submit */}
           <button
             onClick={handleSubmit}

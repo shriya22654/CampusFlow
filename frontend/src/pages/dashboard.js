@@ -7,12 +7,22 @@ import Logo from "../components/logo";
 import InternshipTracker from "./intershipTracker";
 import DSATracker from "./dsa";
 import AssignmentTracker from "./assignment";
-
+const savedUser = JSON.parse(localStorage.getItem("user")) || {};
 const USER = {
-  name: "Arjun Sharma", college: "IIT Delhi", branch: "Computer Science & Engg",
-  year: "3rd Year", avatar: "AS", email: "arjun@iit.ac.in",
-  streak: 14, totalSolved: 342, applications: 12, assignmentsDue: 3, cgpa: "8.7", joined: "Aug 2022",
+  name: savedUser.name || "User",
+  college: savedUser.college || "Update College",
+  branch: savedUser.branch || "Update Branch",
+  year: savedUser.year || "Update Year",
+  avatar: savedUser.name ? savedUser.name.substring(0, 2).toUpperCase() : "CF",
+  email: savedUser.email || "user@email.com",
+  streak: 1, 
+  totalSolved: 0, 
+  applications: 0, 
+  assignmentsDue: 0, 
+  cgpa: "0.0", 
+  joined: "2026",
 };
+
 
 function StatCard({ icon, label, value, accent, sub }) {
   return (
